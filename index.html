@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>五彩連珠</title>
+
+    <!-- iOS / Android App 全螢幕與圖示設定 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="五彩連珠">
+    <meta name="theme-color" content="#3182ce">
+    
+    <!-- App 桌面圖示 -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5726/5726532.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/5726/5726532.png">
+
+    <!-- 動態產生 Manifest 配置檔 (PWA) -->
+    <script>
+        const manifestData = {
+            "name": "五彩連珠",
+            "short_name": "五彩連珠",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#f4f6f9",
+            "theme_color": "#3182ce",
+            "icons": [
+                {
+                    "src": "https://cdn-icons-png.flaticon.com/512/5726/5726532.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --board-bg: #4a5568;
+            --cell-bg: #edf2f7;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* 標題放大 */
+        h1 {
+            color: #2d3748;
+            margin: 0 0 15px 0;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        /* 儀表板與字體放大 */
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 14px 18px;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .score-board, .next-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 18px;
+        }
+
+        .score-value {
+            font-size: 26px;
+            color: #dd6b20;
+            font-weight: 900;
+        }
+
+        .next-balls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .preview-ball {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
+        }
+
+        .restart-btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 3px;
+            background-color: var(--board-bg);
+            padding: 8px;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
+        }
+
+        .cell {
+            background-color: var(--cell-bg);
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.15s;
+        }
+
+        /* 🌟 被選中的格子：變亮黃色背景 + 強烈外發光 */
+        .cell.selected {
+            background-color: #ffeb3b !important;
+            box-shadow: 0 0 14px #ffeb3b, inset 0 0 6px #f57f17;
+            z-index: 10;
+        }
+
+        .ball {
+            width: 82%;
+            height: 82%;
+            border-radius: 50%;
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.4), 1px 1px 4px rgba(0,0,0,0.2);
+            transition: transform 0.15s ease-in-out;
+        }
+
+        /* 🌟 被選中的彩球：高振幅大幅跳動 + 太陽金黃光暈 */
+        .selected .ball {
+            animation: superBounce 0.45s infinite alternate ease-in-out;
+            box-shadow: 0 0 16px 6px #ffea00, inset -3px -3px 6px rgba(0,0,0,0.4);
+        }
+
+        /* 跳動幅度放大 (1.0 倍至 1.3 倍) */
+        @keyframes superBounce {
+            from { transform: scale(1.0) translateY(0); }
+            to { transform: scale(1.3) translateY(-6px); }
+        }
+
+        .color-red    { background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a); }
+        .color-blue   { background: radial-gradient(circle at 30% 30%, #4dabf7, #1864ab); }
+        .color-green  { background: radial-gradient(circle at 30% 30%, #69db7c, #2b8a3e); }
+        .color-yellow { background: radial-gradient(circle at 30% 30%, #ffd43b, #e67700); }
+        .color-purple { background: radial-gradient(circle at 30% 30%, #da77f2, #862e9c); }
+
+        .game-over-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .game-over-modal button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>五彩連珠</h1>
+
+    <div class="dashboard">
+        <div class="score-board">
+            得分: <span id="score" class="score-value">0</span>
+        </div>
+        <div class="next-preview">
+            下一波:
+            <div id="next-balls" class="next-balls"></div>
+        </div>
+        <button class="restart-btn" onclick="initGame()">重新開始</button>
+    </div>
+
+    <div id="grid"></div>
+
+    <div id="game-over" class="game-over-modal">
+        <div>遊戲結束！</div>
+        <div style="margin-top: 10px;">得分：<span id="final-score" style="color: #63b3ed;">0</span></div>
+        <button class="restart-btn" onclick="initGame()">再玩一次</button>
+    </div>
+
+    <script>
+        const GRID_SIZE = 9;
+        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+        const NEW_BALLS_COUNT = 3;
+        
+        let board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+        let selectedCell = null;
+        let score = 0;
+        let nextColors = [];
+
+        const gridEl = document.getElementById('grid');
+        const scoreEl = document.getElementById('score');
+        const nextBallsEl = document.getElementById('next-balls');
+        const gameOverModal = document.getElementById('game-over');
+        const finalScoreEl = document.getElementById('final-score');
+
+        function initGame() {
+            board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+            score = 0;
+            selectedCell = null;
+            scoreEl.textContent = score;
+            gameOverModal.style.display = 'none';
+
+            generateNextColors();
+            renderBoard();
+
+            spawnBalls(5);
+            renderBoard();
+        }
+
+        function generateNextColors() {
+            nextColors = [];
+            for (let i = 0; i < NEW_BALLS_COUNT; i++) {
+                nextColors.push(COLORS[Math.floor(Math.random() * COLORS.length)]);
+            }
+            renderNextPreview();
+        }
+
+        function renderNextPreview() {
+            nextBallsEl.innerHTML = '';
+            nextColors.forEach(color => {
+                const el = document.createElement('div');
+                el.className = `preview-ball color-${color}`;
+                nextBallsEl.appendChild(el);
+            });
+        }
+
+        function renderBoard() {
+            gridEl.innerHTML = '';
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
+                        cell.classList.add('selected');
+                    }
+
+                    if (board[r][c]) {
+                        const ball = document.createElement('div');
+                        ball.className = `ball color-${board[r][c]}`;
+                        cell.appendChild(ball);
+                    }
+
+                    cell.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();
+                        handleCellClick(r, c);
+                    });
+
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(r, c) {
+            // 純畫面視覺反應（無震動）
+            if (board[r][c]) {
+                selectedCell = { r, c };
+                renderBoard();
+                return;
+            }
+
+            if (selectedCell) {
+                if (hasPath(selectedCell.r, selectedCell.c, r, c)) {
+                    board[r][c] = board[selectedCell.r][selectedCell.c];
+                    board[selectedCell.r][selectedCell.c] = null;
+                    selectedCell = null;
+
+                    const cleared = checkAndClearLines();
+
+                    if (!cleared) {
+                        spawnBalls(NEW_BALLS_COUNT);
+                        checkAndClearLines();
+                    }
+
+                    renderBoard();
+
+                    if (isBoardFull()) {
+                        finalScoreEl.textContent = score;
+                        gameOverModal.style.display = 'flex';
+                    }
+                }
+            }
+        }
+
+        function hasPath(startR, startC, targetR, targetC) {
+            const queue = [[startR, startC]];
+            const visited = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+            visited[startR][startC] = true;
+
+            const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+
+            while (queue.length > 0) {
+                const [cr, cc] = queue.shift();
+
+                if (cr === targetR && cc === targetC) return true;
+
+                for (let [dr, dc] of dirs) {
+                    const nr = cr + dr;
+                    const nc = cc + dc;
+
+                    if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+                        if (!visited[nr][nc] && board[nr][nc] === null) {
+                            visited[nr][nc] = true;
+                            queue.push([nr, nc]);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function spawnBalls(count) {
+            const emptyCells = [];
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (board[r][c] === null) emptyCells.push({ r, c });
+                }
+            }
+
+            if (emptyCells.length === 0) return;
+
+            const spawnCount = Math.min(count, emptyCells.length);
+            for (let i = 0; i < spawnCount; i++) {
+                const randIndex = Math.floor(Math.random() * emptyCells.length);
+                const { r, c } = emptyCells.splice(randIndex, 1)[0];
+                board[r][c] = nextColors[i] || COLORS[Math.floor(Math.random() * COLORS.length)];
+            }
+
+            generateNextColors();
+        }
+
+        function checkAndClearLines() {
+            const toClear = new Set();
+            const directions = [[[0, 1]], [[1, 0]], [[1, 1]], [[1, -1]]];
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const color = board[r][c];
+                    if (!color) continue;
+
+                    directions.forEach(([dir]) => {
+                        let line = [{ r, c }];
+                        let dr = dir[0], dc = dir[1];
+
+                        let nr = r + dr, nc = c + dc;
+                        while (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && board[nr][nc] === color) {
+                            line.push({ r: nr, c: nc });
+                            nr += dr;
+                            nc += dc;
+                        }
+
+                        if (line.length >= 5) {
+                            line.forEach(pos => toClear.add(`${pos.r},${pos.c}`));
+                        }
+                    });
+                }
+            }
+
+            if (toClear.size > 0) {
+                score += 10 + (toClear.size - 5) * 2;
+                scoreEl.textContent = score;
+
+                toClear.forEach(key => {
+                    const [r, c] = key.split(',').map(Number);
+                    board[r][c] = null;
+                });
+                return true;
+            }
+
+            return false;
+        }
+
+        function isBoardFull() {
+            return board.every(row => row.every(cell => cell !== null));
+        }
+
+        initGame();
+
+        // 離線遊玩支援
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'color-lines-v2';
+                    self.addEventListener('install', e => {
+                        e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html'])));
+                    });
+                    self.addEventListener('fetch', e => {
+                        e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
+                    });
+                `;
+                const blob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>
