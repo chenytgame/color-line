@@ -69,40 +69,51 @@
             touch-action: manipulation;
         }
 
-        /* 標題放大 */
         h1 {
             color: #2d3748;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             font-size: 28px;
             font-weight: 800;
         }
 
-        /* 儀表板與字體放大 */
         .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+        }
+
+        .score-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 14px 18px;
-            border-radius: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
         }
 
-        .score-board, .next-preview {
+        .score-board, .best-board, .next-preview {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-weight: bold;
             color: #2d3748;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .score-value {
-            font-size: 26px;
+            font-size: 22px;
             color: #dd6b20;
+            font-weight: 900;
+        }
+
+        .best-value {
+            font-size: 22px;
+            color: #38a169;
             font-weight: 900;
         }
 
@@ -123,11 +134,11 @@
             background-color: #3182ce;
             color: white;
             border: none;
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         #grid {
@@ -154,7 +165,7 @@
             transition: background-color 0.15s;
         }
 
-        /* 🌟 被選中的格子：變亮黃色背景 + 強烈外發光 */
+        /* 被選中的格子：變亮黃色背景 + 強烈外發光 */
         .cell.selected {
             background-color: #ffeb3b !important;
             box-shadow: 0 0 14px #ffeb3b, inset 0 0 6px #f57f17;
@@ -169,13 +180,12 @@
             transition: transform 0.15s ease-in-out;
         }
 
-        /* 🌟 被選中的彩球：高振幅大幅跳動 + 太陽金黃光暈 */
+        /* 被選中的彩球：大幅跳動 + 太陽金黃光暈 */
         .selected .ball {
             animation: superBounce 0.45s infinite alternate ease-in-out;
             box-shadow: 0 0 16px 6px #ffea00, inset -3px -3px 6px rgba(0,0,0,0.4);
         }
 
-        /* 跳動幅度放大 (1.0 倍至 1.3 倍) */
         @keyframes superBounce {
             from { transform: scale(1.0) translateY(0); }
             to { transform: scale(1.3) translateY(-6px); }
@@ -196,7 +206,7 @@
             align-items: center;
             flex-direction: column;
             color: white;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             z-index: 100;
         }
@@ -211,22 +221,30 @@
     <h1>五彩連珠</h1>
 
     <div class="dashboard">
-        <div class="score-board">
-            得分: <span id="score" class="score-value">0</span>
+        <div class="score-row">
+            <div class="score-board">
+                得分: <span id="score" class="score-value">0</span>
+            </div>
+            <div class="best-board">
+                🏆 最高分: <span id="best-score" class="best-value">0</span>
+            </div>
         </div>
-        <div class="next-preview">
-            下一波:
-            <div id="next-balls" class="next-balls"></div>
+        <div class="score-row">
+            <div class="next-preview">
+                下一波:
+                <div id="next-balls" class="next-balls"></div>
+            </div>
+            <button class="restart-btn" onclick="initGame()">重新開始</button>
         </div>
-        <button class="restart-btn" onclick="initGame()">重新開始</button>
     </div>
 
     <div id="grid"></div>
 
     <div id="game-over" class="game-over-modal">
         <div>遊戲結束！</div>
-        <div style="margin-top: 10px;">得分：<span id="final-score" style="color: #63b3ed;">0</span></div>
-        <button class="restart-btn" onclick="initGame()">再玩一次</button>
+        <div style="margin-top: 10px; font-size: 22px;">得分：<span id="final-score" style="color: #63b3ed;">0</span></div>
+        <div id="new-high-score-msg" style="margin-top: 5px; color: #f6e05e; font-size: 20px; display: none;">🎉 突破最高紀錄！</div>
+        <button class="restart-btn" style="font-size: 18px; padding: 10px 20px;" onclick="initGame()">再玩一次</button>
     </div>
 
     <script>
@@ -237,20 +255,25 @@
         let board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
         let selectedCell = null;
         let score = 0;
+        let bestScore = parseInt(localStorage.getItem('color_lines_best_score')) || 0;
         let nextColors = [];
 
         const gridEl = document.getElementById('grid');
         const scoreEl = document.getElementById('score');
+        const bestScoreEl = document.getElementById('best-score');
         const nextBallsEl = document.getElementById('next-balls');
         const gameOverModal = document.getElementById('game-over');
         const finalScoreEl = document.getElementById('final-score');
+        const newHighScoreMsgEl = document.getElementById('new-high-score-msg');
 
         function initGame() {
             board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
             score = 0;
             selectedCell = null;
             scoreEl.textContent = score;
+            bestScoreEl.textContent = bestScore;
             gameOverModal.style.display = 'none';
+            newHighScoreMsgEl.style.display = 'none';
 
             generateNextColors();
             renderBoard();
@@ -304,7 +327,6 @@
         }
 
         function handleCellClick(r, c) {
-            // 純畫面視覺反應（無震動）
             if (board[r][c]) {
                 selectedCell = { r, c };
                 renderBoard();
@@ -328,6 +350,15 @@
 
                     if (isBoardFull()) {
                         finalScoreEl.textContent = score;
+                        
+                        // 檢查並更新最高紀錄
+                        if (score > bestScore) {
+                            bestScore = score;
+                            localStorage.setItem('color_lines_best_score', bestScore);
+                            bestScoreEl.textContent = bestScore;
+                            newHighScoreMsgEl.style.display = 'block';
+                        }
+
                         gameOverModal.style.display = 'flex';
                     }
                 }
@@ -412,6 +443,13 @@
                 score += 10 + (toClear.size - 5) * 2;
                 scoreEl.textContent = score;
 
+                // 遊戲中隨時即時更新最高分顯示
+                if (score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('color_lines_best_score', bestScore);
+                    bestScoreEl.textContent = bestScore;
+                }
+
                 toClear.forEach(key => {
                     const [r, c] = key.split(',').map(Number);
                     board[r][c] = null;
@@ -432,7 +470,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'color-lines-v2';
+                    const CACHE_NAME = 'color-lines-v3';
                     self.addEventListener('install', e => {
                         e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html'])));
                     });
