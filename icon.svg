@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- 綠球漸層 -->
+    <radialGradient id="ballGreen" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#69db7c" />
+      <stop offset="70%" stop-color="#2b8a3e" />
+      <stop offset="100%" stop-color="#1e5e2a" />
+    </radialGradient>
+
+    <!-- 紅球漸層 -->
+    <radialGradient id="ballRed" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ff6b6b" />
+      <stop offset="70%" stop-color="#c92a2a" />
+      <stop offset="100%" stop-color="#861e1e" />
+    </radialGradient>
+
+    <!-- 黃球漸層 -->
+    <radialGradient id="ballYellow" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffd43b" />
+      <stop offset="70%" stop-color="#e67700" />
+      <stop offset="100%" stop-color="#9e5100" />
+    </radialGradient>
+
+    <!-- 藍球漸層 -->
+    <radialGradient id="ballBlue" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#4dabf7" />
+      <stop offset="70%" stop-color="#1864ab" />
+      <stop offset="100%" stop-color="#0f3c68" />
+    </radialGradient>
+
+    <!-- 方格微陰影 -->
+    <filter id="tileShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- App 外框與底色 (深灰藍) -->
+  <rect width="512" height="512" rx="115" fill="#475266" />
+
+  <!-- 2x2 格子矩陣 -->
+  <g filter="url(#tileShadow)">
+    <!-- 左上格 -->
+    <rect x="40" y="40" width="200" height="200" rx="36" fill="#f0f4f8" />
+    <!-- 右上格 -->
+    <rect x="272" y="40" width="200" height="200" rx="36" fill="#f0f4f8" />
+    <!-- 左下格 -->
+    <rect x="40" y="272" width="200" height="200" rx="36" fill="#f0f4f8" />
+    <!-- 右下格 -->
+    <rect x="272" y="272" width="200" height="200" rx="36" fill="#f0f4f8" />
+  </g>
+
+  <!-- 四色彩球 -->
+  <!-- 左上：綠球 -->
+  <circle cx="140" cy="140" r="76" fill="url(#ballGreen)" />
+  
+  <!-- 右上：紅球 -->
+  <circle cx="372" cy="140" r="76" fill="url(#ballRed)" />
+  
+  <!-- 左下：黃球 -->
+  <circle cx="140" cy="372" r="76" fill="url(#ballYellow)" />
+  
+  <!-- 右下：藍球 -->
+  <circle cx="372" cy="372" r="76" fill="url(#ballBlue)" />
+</svg>
