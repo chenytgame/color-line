@@ -10,21 +10,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="五彩連珠">
-    <meta name="theme-color" content="#3182ce">
+    <meta name="theme-color" content="#f4f5f7">
     
     <!-- App 桌面圖示 -->
     <link rel="apple-touch-icon" href="./icon.svg">
-    <link rel="icon" type="image/png" href="./icon.svg">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
 
-    <!-- 動態產生 Manifest 配置檔 (PWA) -->
+    <!-- PWA Manifest -->
     <script>
         const manifestData = {
             "name": "五彩連珠",
             "short_name": "五彩連珠",
             "start_url": "./index.html",
             "display": "standalone",
-            "background_color": "#f4f6f9",
-            "theme_color": "#3182ce",
+            "background_color": "#f4f5f7",
+            "theme_color": "#f4f5f7",
             "icons": [
                 {
                     "src": "./icon.svg",
@@ -45,9 +45,10 @@
 
     <style>
         :root {
-            --bg-color: #f4f6f9;
-            --board-bg: #4a5568;
-            --cell-bg: #edf2f7;
+            --bg-color: #f4f5f7;
+            --board-bg: #e2e8f0;
+            --cell-bg: #ffffff;
+            --primary-blue: #1890ff;
         }
 
         * {
@@ -61,147 +62,163 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 10px;
+            padding: 16px 12px;
             user-select: none;
             touch-action: manipulation;
         }
 
-        h1 {
-            color: #2d3748;
-            margin: 0 0 10px 0;
-            font-size: 28px;
+        /* 頂部資訊看板 */
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            background: #ededed;
+            padding: 14px 10px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .dash-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .dash-divider {
+            width: 1px;
+            height: 36px;
+            background-color: #d0d0d0;
+        }
+
+        .dash-title {
+            font-size: 16px;
+            color: #666666;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .dash-value {
+            font-size: 26px;
+            color: #1890ff;
             font-weight: 800;
         }
 
-        .dashboard {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 12px 18px;
-            border-radius: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 12px;
-        }
-
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .score-board, .best-board, .next-preview {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: bold;
-            color: #2d3748;
-            font-size: 16px;
-        }
-
-        .score-value {
-            font-size: 22px;
-            color: #dd6b20;
-            font-weight: 900;
-        }
-
-        .best-value {
-            font-size: 22px;
-            color: #38a169;
-            font-weight: 900;
-        }
-
-        .next-balls {
+        /* 下一波預覽彩球 */
+        .next-preview {
             display: flex;
             gap: 6px;
             align-items: center;
+            justify-content: center;
         }
 
         .preview-ball {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3);
         }
 
-        .restart-btn {
-            background-color: #3182ce;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
+        /* 棋盤區域 */
         #grid {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             grid-template-rows: repeat(9, 1fr);
-            gap: 3px;
-            background-color: var(--board-bg);
+            gap: 4px;
+            background-color: #e5e7eb;
             padding: 8px;
-            border-radius: 14px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 20px;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             aspect-ratio: 1 / 1;
+            margin-bottom: 20px;
         }
 
         .cell {
             background-color: var(--cell-bg);
-            border-radius: 6px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            transition: background-color 0.15s;
         }
 
-        /* 被選中的格子：變亮黃色背景 + 強烈外發光 */
-        .cell.selected {
-            background-color: #ffeb3b !important;
-            box-shadow: 0 0 14px #ffeb3b, inset 0 0 6px #f57f17;
-            z-index: 10;
-        }
-
+        /* 平面化彩球（非立體、無內漸層） */
         .ball {
-            width: 82%;
-            height: 82%;
+            width: 78%;
+            height: 78%;
             border-radius: 50%;
-            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.4), 1px 1px 4px rgba(0,0,0,0.2);
-            transition: transform 0.15s ease-in-out;
+            transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* 被選中的彩球：大幅跳動 + 太陽金黃光暈 */
-        .selected .ball {
-            animation: superBounce 0.45s infinite alternate ease-in-out;
-            box-shadow: 0 0 16px 6px #ffea00, inset -3px -3px 6px rgba(0,0,0,0.4);
+        /* 純平面色彩定義 */
+        .color-purple { background-color: #a855f7; }
+        .color-blue   { background-color: #3b82f6; }
+        .color-red    { background-color: #ef4444; }
+        .color-green  { background-color: #22c55e; }
+        .color-yellow { background-color: #eab308; }
+
+        /* 被點選時的樣式：白圈 + 珠子同色光暈 (與圖片一致) */
+        .selected .ball.color-purple {
+            outline: 2.5px solid #ffffff;
+            box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.45), 0 0 12px rgba(168, 85, 247, 0.8);
+            transform: scale(1.05);
+        }
+        .selected .ball.color-blue {
+            outline: 2.5px solid #ffffff;
+            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.45), 0 0 12px rgba(59, 130, 246, 0.8);
+            transform: scale(1.05);
+        }
+        .selected .ball.color-red {
+            outline: 2.5px solid #ffffff;
+            box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.45), 0 0 12px rgba(239, 68, 68, 0.8);
+            transform: scale(1.05);
+        }
+        .selected .ball.color-green {
+            outline: 2.5px solid #ffffff;
+            box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.45), 0 0 12px rgba(34, 197, 94, 0.8);
+            transform: scale(1.05);
+        }
+        .selected .ball.color-yellow {
+            outline: 2.5px solid #ffffff;
+            box-shadow: 0 0 0 5px rgba(234, 179, 8, 0.45), 0 0 12px rgba(234, 179, 8, 0.8);
+            transform: scale(1.05);
         }
 
-        @keyframes superBounce {
-            from { transform: scale(1.0) translateY(0); }
-            to { transform: scale(1.3) translateY(-6px); }
+        /* 滿版大按鈕 */
+        .action-btn {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px 0;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(24, 144, 255, 0.25);
         }
 
-        .color-red    { background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a); }
-        .color-blue   { background: radial-gradient(circle at 30% 30%, #4dabf7, #1864ab); }
-        .color-green  { background: radial-gradient(circle at 30% 30%, #69db7c, #2b8a3e); }
-        .color-yellow { background: radial-gradient(circle at 30% 30%, #ffd43b, #e67700); }
-        .color-purple { background: radial-gradient(circle at 30% 30%, #da77f2, #862e9c); }
+        .action-btn:active {
+            opacity: 0.9;
+            transform: translateY(1px);
+        }
 
+        /* 遊戲結束彈窗 */
         .game-over-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.75);
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -210,46 +227,46 @@
             font-weight: bold;
             z-index: 100;
         }
-
-        .game-over-modal button {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>五彩連珠</h1>
-
+    <!-- 頂部數據看板 -->
     <div class="dashboard">
-        <div class="score-row">
-            <div class="score-board">
-                得分: <span id="score" class="score-value">0</span>
-            </div>
-            <div class="best-board">
-                🏆 最高分: <span id="best-score" class="best-value">0</span>
-            </div>
+        <div class="dash-item">
+            <div class="dash-title">最佳紀錄</div>
+            <div id="best-score" class="dash-value">0</div>
         </div>
-        <div class="score-row">
-            <div class="next-preview">
-                下一波:
-                <div id="next-balls" class="next-balls"></div>
-            </div>
-            <button class="restart-btn" onclick="initGame()">重新開始</button>
+        <div class="dash-divider"></div>
+        <div class="dash-item">
+            <div class="next-preview" id="next-balls"></div>
+        </div>
+        <div class="dash-divider"></div>
+        <div class="dash-item">
+            <div class="dash-title">分數</div>
+            <div id="score" class="dash-value">0</div>
         </div>
     </div>
 
+    <!-- 9x9 棋盤 -->
     <div id="grid"></div>
 
+    <!-- 重新開始按鈕 -->
+    <button class="action-btn" onclick="initGame()">
+        🔄 重新開始
+    </button>
+
+    <!-- 遊戲結束視窗 -->
     <div id="game-over" class="game-over-modal">
         <div>遊戲結束！</div>
-        <div style="margin-top: 10px; font-size: 22px;">得分：<span id="final-score" style="color: #63b3ed;">0</span></div>
-        <div id="new-high-score-msg" style="margin-top: 5px; color: #f6e05e; font-size: 20px; display: none;">🎉 突破最高紀錄！</div>
-        <button class="restart-btn" style="font-size: 18px; padding: 10px 20px;" onclick="initGame()">再玩一次</button>
+        <div style="margin-top: 10px; font-size: 22px;">得分：<span id="final-score" style="color: #60a5fa;">0</span></div>
+        <div id="new-high-score-msg" style="margin-top: 5px; color: #facc15; font-size: 20px; display: none;">🎉 突破最高紀錄！</div>
+        <button class="action-btn" style="width: auto; padding: 10px 28px; margin-top: 20px;" onclick="initGame()">再玩一次</button>
     </div>
 
     <script>
         const GRID_SIZE = 9;
-        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+        const COLORS = ['purple', 'blue', 'red', 'green', 'yellow'];
         const NEW_BALLS_COUNT = 3;
         
         let board = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
@@ -351,7 +368,6 @@
                     if (isBoardFull()) {
                         finalScoreEl.textContent = score;
                         
-                        // 檢查並更新最高紀錄
                         if (score > bestScore) {
                             bestScore = score;
                             localStorage.setItem('color_lines_best_score', bestScore);
@@ -443,7 +459,6 @@
                 score += 10 + (toClear.size - 5) * 2;
                 scoreEl.textContent = score;
 
-                // 遊戲中隨時即時更新最高分顯示
                 if (score > bestScore) {
                     bestScore = score;
                     localStorage.setItem('color_lines_best_score', bestScore);
@@ -466,11 +481,11 @@
 
         initGame();
 
-        // 離線遊玩支援
+        // 離線 PWA 支援
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'color-lines-v3';
+                    const CACHE_NAME = 'color-lines-v4';
                     self.addEventListener('install', e => {
                         e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html'])));
                     });
