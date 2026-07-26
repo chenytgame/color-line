@@ -48,7 +48,7 @@
             --bg-color: #f4f5f7;
             --board-bg: #e2e8f0;
             --cell-bg: #ffffff;
-            --primary-blue: #1890ff;
+            --primary-blue: #2563eb;
         }
 
         * {
@@ -105,7 +105,7 @@
 
         .dash-value {
             font-size: 26px;
-            color: #1890ff;
+            color: #2563eb;
             font-weight: 800;
         }
 
@@ -155,12 +155,12 @@
             transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* 高對比顏色配置 */
-        .color-purple { background-color: #c026d3; } /* 鮮豔紫羅蘭色 */
-        .color-blue   { background-color: #06b6d4; } /* 亮天藍/水藍色 */
-        .color-red    { background-color: #ef4444; } /* 鮮紅 */
-        .color-green  { background-color: #22c55e; } /* 鮮綠 */
-        .color-yellow { background-color: #eab308; } /* 亮黃 */
+        /* 高對比且區隔明顯的顏色配置 */
+        .color-purple { background-color: #c026d3; } /* 紫羅蘭紫 */
+        .color-blue   { background-color: #2563eb; } /* 寶藍色（與綠色完全區隔） */
+        .color-red    { background-color: #dc2626; } /* 鮮紅 */
+        .color-green  { background-color: #16a34a; } /* 翠綠色 */
+        .color-yellow { background-color: #ca8a04; } /* 深黃/琥珀黃 */
 
         /* 被點選時的樣式：白圈 + 珠子同色光暈 */
         .selected .ball.color-purple {
@@ -170,22 +170,22 @@
         }
         .selected .ball.color-blue {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(6, 182, 212, 0.45), 0 0 12px rgba(6, 182, 212, 0.8);
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.45), 0 0 12px rgba(37, 99, 235, 0.8);
             transform: scale(1.05);
         }
         .selected .ball.color-red {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.45), 0 0 12px rgba(239, 68, 68, 0.8);
+            box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.45), 0 0 12px rgba(220, 38, 38, 0.8);
             transform: scale(1.05);
         }
         .selected .ball.color-green {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.45), 0 0 12px rgba(34, 197, 94, 0.8);
+            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.45), 0 0 12px rgba(22, 163, 74, 0.8);
             transform: scale(1.05);
         }
         .selected .ball.color-yellow {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(234, 179, 8, 0.45), 0 0 12px rgba(234, 179, 8, 0.8);
+            box-shadow: 0 0 0 5px rgba(202, 138, 4, 0.45), 0 0 12px rgba(202, 138, 4, 0.8);
             transform: scale(1.05);
         }
 
@@ -205,7 +205,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 8px rgba(24, 144, 255, 0.25);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
         }
 
         .action-btn:active {
@@ -485,7 +485,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'color-lines-v5';
+                    const CACHE_NAME = 'color-lines-v6';
                     self.addEventListener('install', e => {
                         e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html'])));
                     });
