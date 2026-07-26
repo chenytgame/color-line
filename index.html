@@ -147,7 +147,7 @@
             position: relative;
         }
 
-        /* 平面化彩球（非立體、無內漸層） */
+        /* 平面化彩球 */
         .ball {
             width: 78%;
             height: 78%;
@@ -155,22 +155,22 @@
             transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        /* 純平面色彩定義 */
-        .color-purple { background-color: #a855f7; }
-        .color-blue   { background-color: #3b82f6; }
-        .color-red    { background-color: #ef4444; }
-        .color-green  { background-color: #22c55e; }
-        .color-yellow { background-color: #eab308; }
+        /* 高對比顏色配置 */
+        .color-purple { background-color: #c026d3; } /* 鮮豔紫羅蘭色 */
+        .color-blue   { background-color: #06b6d4; } /* 亮天藍/水藍色 */
+        .color-red    { background-color: #ef4444; } /* 鮮紅 */
+        .color-green  { background-color: #22c55e; } /* 鮮綠 */
+        .color-yellow { background-color: #eab308; } /* 亮黃 */
 
-        /* 被點選時的樣式：白圈 + 珠子同色光暈 (與圖片一致) */
+        /* 被點選時的樣式：白圈 + 珠子同色光暈 */
         .selected .ball.color-purple {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.45), 0 0 12px rgba(168, 85, 247, 0.8);
+            box-shadow: 0 0 0 5px rgba(192, 38, 211, 0.45), 0 0 12px rgba(192, 38, 211, 0.8);
             transform: scale(1.05);
         }
         .selected .ball.color-blue {
             outline: 2.5px solid #ffffff;
-            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.45), 0 0 12px rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 0 5px rgba(6, 182, 212, 0.45), 0 0 12px rgba(6, 182, 212, 0.8);
             transform: scale(1.05);
         }
         .selected .ball.color-red {
@@ -485,7 +485,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'color-lines-v4';
+                    const CACHE_NAME = 'color-lines-v5';
                     self.addEventListener('install', e => {
                         e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html'])));
                     });
